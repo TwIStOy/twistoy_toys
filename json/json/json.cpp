@@ -31,6 +31,61 @@ namespace twistoy {
 		objectValue_ = val;
 		type_ = ObjectType::OBJECT;
 	}
+	JsonObject::JsonObject(ObjectType type) : JsonObject() {
+		if (type != ObjectType::UNKOWN) {
+			error("Constructor error.");
+		}
+		type_ = ObjectType::UNKOWN;
+	}
+
+	void JsonObject::error(const std::string& msg) const {
+		std::cout << "An error occured." << std::endl;
+		std::cout << msg << std::endl;
+		exit(1);
+	}
+
+	const JsonObject& JsonObject::get(const std::string& key) const {
+		if (type_ != ObjectType::OBJECT) {
+			error("Can't get.");
+		}
+		auto iter = objectValue_.find(key);
+		if (iter != objectValue_.end()) {
+			return iter->second;
+		}
+		return JsonObject(ObjectType::UNKOWN);
+	}
+
+	ObjectType JsonObject::getType() const {
+		return type_;
+	}
+	const std::vector<JsonObject>& JsonObject::getArrayValue() const {
+		return arrayValue_;
+	}
+	const std::map<std::string, JsonObject>& JsonObject::getObjectValue() const {
+		return objectValue_;
+	}
+	const std::pair<int, double>& JsonObject::getNumberValue() const {
+		return std::make_pair(intValue_, realValue_);
+	}
+	bool JsonObject::getNumberRealNumber() const {
+		return realNumber_;
+	}
+	bool JsonObject::getBooleanValue() const {
+		return booleanValue_;
+	}
+	const std::string& JsonObject::getStringValue() const {
+		return strValue_;
+	}
+
+
+
+	std::string JsonObject::dump(bool format) const {
+		if (!format)
+			return toString();
+		else {
+			return _formatString(0, false);
+		}
+	}
 
 	std::string JsonObject::toString() const {
 		std::string rv;
@@ -75,7 +130,7 @@ namespace twistoy {
 		case ObjectType::OBJECT:
 			rv = "{";
 			for (auto item : objectValue_) {
-				rv += item.first + ":" + item.second.toString() + ",";
+				rv += '"' + item.first + "\":" + item.second.toString() + ",";
 			}
 			if (objectValue_.size() != 0)
 				rv.pop_back();
@@ -86,9 +141,6 @@ namespace twistoy {
 		}
 	}
 
-	std::string JsonObject::getString() const {
-		return strValue_;
-	}
 
 #ifdef DEBUG
 	std::string JsonObject::debugString() const {
@@ -143,6 +195,69 @@ namespace twistoy {
 		}
 	}
 #endif
+	std::string JsonObject::_formatString(int nTabs, bool value) const {
+		std::string tabs(""); for (int i = 0; i < nTabs; i++) tabs.push_back('\t');
+		std::string rv("");
+		switch (type_) {
+		case ObjectType::NUMBER:
+			if (value)
+				return toString();
+			return tabs + toString();
+		case ObjectType::BOOLEAN:
+			if (value)
+				return toString();
+			return tabs + toString();
+		case ObjectType::NONE:
+			if (value)
+				return toString();
+			return tabs + toString();
+		case ObjectType::STRING:
+			if (value)
+				return toString();
+			return tabs + toString();
+		case ObjectType::ARRAY:
+			if (value)
+				rv = "[";
+			else
+				rv = tabs + "[";
+			for (auto item : arrayValue_) {
+				rv += item._formatString(nTabs + 1, true) + ", ";
+			}
+			if (arrayValue_.size() != 0) {
+				rv.pop_back();
+				rv.pop_back();
+			}
+			rv.push_back(']');
+			return rv;
+		case ObjectType::OBJECT:
+			if (value)
+				rv = "{\n";
+			else
+				rv = tabs + "{\n";
+
+			tabs += '\t';
+			for (auto item : objectValue_) {
+				rv += tabs + "\"" + item.first + "\": " + item.second._formatString(nTabs + 1, true) + ",\n";
+			}
+			if (objectValue_.size() != 0) {
+				rv.pop_back();
+				rv.pop_back();
+			}
+			rv.push_back('\n');
+
+			if (value) {
+				tabs.pop_back();
+				rv += tabs + "}";
+			}
+			else {
+				tabs.pop_back();
+				rv += tabs + "}\n";
+			}
+			return rv;
+		default:
+			return "error";
+		}
+	}
 
 	void Scanner::error(const std::string& msg) {
 		std::cout << "Error occur at (" << line_ << ", " << column_ << "), msg: " << std::endl;
@@ -316,7 +431,7 @@ namespace twistoy {
 		std::map<std::string, JsonObject> rv;
 
 		SkipSpace();
-		auto key = handleString().getString();
+		auto key = handleString().getStringValue();
 		if (rv.find(key) != rv.end())
 			error("Error in handing object. Already has key \"" + key + "\".");
 		SkipSpace();
@@ -332,7 +447,7 @@ namespace twistoy {
 		while (peekChar() == ',') {
 			getNextChar();
 			SkipSpace();
-			auto key = handleString().getString();
+			auto key = handleString().getStringValue();
 			if (rv.find(key) != rv.end())
 				error("Error in handing object. Already has key \"" + key + "\".");
 			SkipSpace();
