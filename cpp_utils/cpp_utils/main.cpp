@@ -1,31 +1,18 @@
 #include <iostream>
-#include "enumerate.h"
-#include <vector>
-#include <string>
-#include <cstdio>
-#include <algorithm>
+#include "utils.h"
+using namespace std;
+using namespace twistoy;
 
-using std::cin;
-using std::cout;
-using std::endl;
-using std::vector;
-using std::string;
-using twistoy::enumerate;
-using std::printf;
-using std::tie;
-using std::sort;
+struct tmp {
+	int a, b, c, d, e, f;
+};
 
 int main() {
-	vector<string> v = {
-		"fuck", "shit", "hello", "world"
-	};
-	for (auto x : enumerate(v)) {
-		int a;
-		string str;
-		tie(a, str) = x;
-		printf("(%d, %s)\n", a, str.c_str());
-	}
-	getchar();
+	MaxType<int, long long, long, tmp>::type a;
+	cout << typeid(a).name() << endl;
+	cout << sizeof(decltype(a)) << endl;
 
+	//cout << MaxInteger<1, 2, 3, 4>::value << endl;
+	getchar();
 	return 0;
 }

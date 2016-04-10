@@ -133,6 +133,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="enumerate.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="zip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
