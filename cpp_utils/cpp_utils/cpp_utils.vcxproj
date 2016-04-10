@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="enumerate.h" />
+    <ClInclude Include="tuple_operator.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="zip.h" />
   </ItemGroup>
